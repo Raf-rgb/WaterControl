@@ -160,12 +160,12 @@ def show_water_control():
             if seconds > 0:
                 time_message += f"{seconds} segundos."
 
-            st.markdown(f"**Inicio:** {st.session_state.usage_data.start_time}")
-            st.markdown(f"**Fin:** {st.session_state.usage_data.end_time}")
+            st.markdown(f"**Inicio:** {st.session_state.usage_data['start_time']}")
+            st.markdown(f"**Fin:** {st.session_state.usage_data['end_time']}")
             st.markdown(f"**Tiempo de uso:** {time_message}")
             st.markdown(f"**Tiempo total de proceso:** {time_message}")
-            st.markdown(f"**Ciclos:** {st.session_state.usage_data.cycles}")
-            st.markdown(f"**Costo:** ${st.session_state.usage_data.cost}")
+            st.markdown(f"**Ciclos:** {st.session_state.usage_data['cycles']}")
+            st.markdown(f"**Costo:** ${st.session_state.usage_data['cost']}")
             st.markdown('---')
 
 if __name__ == '__main__':
