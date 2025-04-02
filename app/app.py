@@ -29,6 +29,15 @@ if "total_cycles" not in st.session_state:
 if "usage_data" not in st.session_state:
     st.session_state["usage_data"] = None
 
+if "max_cycles_usage" not in st.session_state:
+    st.session_state["max_cycles_usage"] = st.secrets.app_config.max_cycles_usage
+
+if "max_minutes_usage" not in st.session_state:
+    st.session_state["max_minutes_usage"] = st.secrets.app_config.max_minutes_usage
+
+if "minutes_to_rest" not in st.session_state:
+    st.session_state["minutes_to_rest"] = st.secrets.app_config.minutes_to_rest
+
 def sleep_with_stop(total_seconds):
     for _ in range(int(total_seconds)):
         if st.session_state.get("stop_flag", False):
@@ -49,7 +58,7 @@ def insert_data(total_cycles:int):
             "start_time": st.session_state.start_time,
             "end_time": end_time,
             "total_seconds_usage": total_time_usage,
-            "total_seconds_process": total_time_usage + st.secrets.app_config.minutes_to_rest * (total_cycles - 1),
+            "total_seconds_process": total_time_usage + st.session_state.minutes_to_rest * (total_cycles - 1),
             "cycles": total_cycles,
             "cost": (st.secrets.app_config.kwh_per_hour / 60) * (total_time_usage / 60) * electricity_cost
         }
@@ -63,7 +72,7 @@ def insert_data(total_cycles:int):
         logging.error(f'Error inserting data: {e}')
 
 def start_pump_process():
-    max_cycles = st.secrets.app_config.max_cycles_usage
+    max_cycles = st.session_state.max_cycles_usage
 
     if st.session_state.start_time is None:
         st.session_state.start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -76,17 +85,17 @@ def start_pump_process():
 
             st.success(f"💧 Ciclo {st.session_state.cycles} iniciado!")
 
-            if not sleep_with_stop(st.secrets.app_config.max_minutes_usage * 60):
+            if not sleep_with_stop(st.session_state.max_minutes_usage * 60):
                 break
 
             logging.info("🔌 Stopping pump...")
             turn_off_pump()
 
             if st.session_state.cycles < max_cycles:
-                logging.info(f"🛏️ Resting for {st.secrets.app_config.minutes_to_rest} minutes...")
-                st.warning(f"🛏️ Descansando por {st.secrets.app_config.minutes_to_rest} minutos...")
+                logging.info(f"🛏️ Resting for {st.session_state.minutes_to_rest} minutes...")
+                st.warning(f"🛏️ Descansando por {st.session_state.minutes_to_rest} minutos...")
                 
-                if not sleep_with_stop(st.secrets.app_config.minutes_to_rest * 60):
+                if not sleep_with_stop(st.session_state.minutes_to_rest * 60):
                     break
             
             st.session_state.cycles += 1
@@ -108,12 +117,45 @@ def stop_pump_process():
 
     insert_data(st.session_state.total_cycles)
 
-    st.session_state.cycles = st.secrets.app_config.max_cycles_usage + 1
+    st.session_state.cycles = st.session_state.max_cycles_usage + 1
 
     st.rerun()
 
 def show_data_process():
     logging.info('Showing data...')
+
+def show_form():
+    with st.expander("Config", expanded=False, icon="⚙️"):
+        with st.form(key='config_form'):
+            st.session_state.max_cycles_usage = st.number_input(
+                label='Ciclos máximos de uso',
+                min_value=1,
+                max_value=10,
+                value=st.session_state.max_cycles_usage,
+                step=1
+            )
+            
+            st.session_state["max_minutes_usage"] = st.number_input(
+                label='Minutos máximos de uso',
+                min_value=1,
+                max_value=60,
+                value=st.session_state.max_minutes_usage,
+                step=1
+            )
+
+            st.session_state["minutes_to_rest"] = st.number_input(
+                label='Minutos de descanso entre ciclos',
+                min_value=1,
+                max_value=60,
+                value=st.session_state.minutes_to_rest,
+                step=1
+            )
+
+            submit_btn = st.form_submit_button(label='Guardar configuración', type="primary")
+            
+            if submit_btn:
+                st.success('Configuración guardada!')
+                st.rerun()
 
 def show_water_control():
     st.header('🐳 Water Control')

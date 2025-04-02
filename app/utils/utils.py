@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 def get_mongo_client():
     try:
-        client = pymongo.MongoClient(st.secrets['mongo_secrets']['uri'])
+        client = pymongo.MongoClient(st.secrets.mongo_secrets.uri)
         logging.info('MongoDB connection established successfully')
         return client
     except Exception as e:
