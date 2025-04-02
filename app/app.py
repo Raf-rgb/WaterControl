@@ -159,6 +159,9 @@ def show_form():
 
 def show_water_control():
     st.header('🐳 Water Control')
+    
+    show_form()
+
     st.divider()
     
     col_start, col_stop, col_data = st.columns(3)
