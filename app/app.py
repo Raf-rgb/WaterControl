@@ -154,8 +154,8 @@ def show_form():
             submit_btn = st.form_submit_button(label='Guardar configuración', type="primary")
             
             if submit_btn:
-                st.success('Configuración guardada!')
-                st.rerun()
+                st.toast('✅ Configuración guardada!')
+                # st.rerun()
 
 def show_water_control():
     st.header('🐳 Water Control')
